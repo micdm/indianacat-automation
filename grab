@@ -1,7 +1,6 @@
 #!/bin/sh
 
-/opt/android-sdk/platform-tools/adb shell "screencap | gzip" | \
-    sed 's/\r$//' | \
+/opt/android-sdk/platform-tools/adb exec-out "screencap | gzip" | \
     gunzip | \
     tail -c +13 | \
     convert -size 2560x1600 -depth 8 rgba:- $1
