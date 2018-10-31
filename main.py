@@ -333,15 +333,13 @@ STAGES = [PowerOffStage(), DesktopStage(), StartBonusStage(), StartStage(), Bonu
           UnityAdStage()]
 
 
-def create_image(path: str) -> Image:
-    return open_image(path).convert('RGB')
-
-
-def grab_screenshot(directory: str) -> str:
+def grab_screenshot(directory: str) -> Optional[str]:
     now = time()
     logger.debug('Grabbing screenshot')
     path = os.path.join(directory, '%s.png' % uuid4())
-    call(['./grab', path])
+    if call(['./grab', path]):
+        logger.warning('Cannot grab screenshot %s', path)
+        return None
     logger.debug('Screenshot %s ready in %.3f seconds', path, time() - now)
     return path
 
@@ -372,6 +370,9 @@ def run():
         while True:
             now = time()
             path = grab_screenshot(directory)
+            if not path:
+                sleep(TICK_INTERVAL)
+                continue
             screenshot = create_image(path)
             screenshots.insert(0, (path, screenshot))
             actual = get_actual_screenshots(screenshots)
@@ -381,8 +382,9 @@ def run():
                 if stage:
                     logger.info('Stage now is %s', stage)
                     stage.get_command(prev_stage).execute()
-                    sleep(TICK_INTERVAL)
                     prev_stage = stage
+                    sleep(TICK_INTERVAL)
+                    continue
                 else:
                     logger.info('Unknown stage')
             wait = TICK_INTERVAL - (time() - now)
