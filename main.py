@@ -47,6 +47,15 @@ SCREENSHOTS_TO_START = 2
 TICK_INTERVAL = 5
 
 
+def create_image(path: str) -> Image:
+    return open_image(path).convert('RGB')
+
+
+REFERENCES = dict((name, create_image('references/%s.png' % name)) for name in (
+    'ad', 'ad_unity', 'bank', 'bank_no_button', 'bonus', 'desktop', 'offline', 'power_off', 'reward', 'start',
+    'start_bonus', 'video_not_available'
+))
+
 class Condition:
 
     def is_met(self, screenshot: Image, prev_screenshots: List[Image], stage, prev_stage) -> bool:
@@ -185,7 +194,7 @@ class PowerOffStage(Stage):
 class DesktopStage(Stage):
 
     def get_condition(self) -> Condition:
-        return SimilarScreenshotCondition(create_image('references/desktop.png'), 2470, 18, 82, 1570)
+        return SimilarScreenshotCondition(REFERENCES['desktop'], 2470, 18, 82, 1570)
 
     def get_command(self, prev_stage) -> Command:
         return StartGameCommand()
@@ -194,7 +203,7 @@ class DesktopStage(Stage):
 class StartBonusStage(Stage):
 
     def get_condition(self) -> Condition:
-        return SimilarScreenshotCondition(create_image('references/start_bonus.png'), 503, 1363, 31, 112)
+        return SimilarScreenshotCondition(REFERENCES['start_bonus'], 503, 1363, 31, 112)
 
     def get_command(self, prev_stage) -> Command:
         return ClickCommand(131, 405)
@@ -204,9 +213,9 @@ class StartStage(Stage):
 
     def get_condition(self) -> Condition:
         return AndCondition(
-            SimilarScreenshotCondition(create_image('references/start.png'), 62, 929, 84, 84),
+            SimilarScreenshotCondition(REFERENCES['start'], 62, 929, 84, 84),
             NotCondition(
-                SimilarScreenshotCondition(create_image('references/start_bonus.png'), 503, 1363, 31, 112)
+                SimilarScreenshotCondition(REFERENCES['start_bonus'], 503, 1363, 31, 112)
             )
         )
 
@@ -217,7 +226,7 @@ class StartStage(Stage):
 class BonusStage(Stage):
 
     def get_condition(self) -> Condition:
-        return SimilarScreenshotCondition(create_image('references/bonus.png'), 48, 280, 188, 1294)
+        return SimilarScreenshotCondition(REFERENCES['bonus'], 48, 280, 188, 1294)
 
     def get_command(self, prev_stage) -> Command:
         return ClickCommand(800, 2362)
@@ -226,7 +235,7 @@ class BonusStage(Stage):
 class RewardStage(Stage):
 
     def get_condition(self) -> Condition:
-        return SimilarScreenshotCondition(create_image('references/reward.png'), 898, 306, 114, 1000)
+        return SimilarScreenshotCondition(REFERENCES['reward'], 898, 306, 114, 1000)
 
     def get_command(self, prev_stage) -> Command:
         return ClickCommand(784, 1538)
@@ -235,7 +244,7 @@ class RewardStage(Stage):
 class BankStage(Stage):
 
     def get_condition(self) -> Condition:
-        return SimilarScreenshotCondition(create_image('references/bank.png'), 1806, 130, 286, 1336)
+        return SimilarScreenshotCondition(REFERENCES['bank'], 1806, 130, 286, 1336)
 
     def get_command(self, prev_stage) -> Command:
         return ClickCommand(800, 1900)
@@ -245,9 +254,9 @@ class BankTimerStage(Stage):
 
     def get_condition(self) -> Condition:
         return AndCondition(
-            SimilarScreenshotCondition(create_image('references/bank.png'), 386, 64, 144, 1472),
+            SimilarScreenshotCondition(REFERENCES['bank'], 386, 64, 144, 1472),
             NotCondition(
-                SimilarScreenshotCondition(create_image('references/bank.png'), 1806, 130, 286, 1336)
+                SimilarScreenshotCondition(REFERENCES['bank'], 1806, 130, 286, 1336)
             )
         )
 
@@ -263,16 +272,20 @@ class BankTimerStage(Stage):
 class BankNoButtonStage(Stage):
 
     def get_condition(self) -> Condition:
-        return SimilarScreenshotCondition(create_image('references/bank_no_button.png'), 592, 62, 154, 1470)
+        return SimilarScreenshotCondition(REFERENCES['bank_no_button'], 592, 62, 154, 1470)
 
     def get_command(self, prev_stage) -> Command:
-        return StopGameCommand()
+        return BatchCommand(
+            StopGameCommand(),
+            TogglePowerCommand(),
+            WaitCommand(timedelta(minutes=10))
+        )
 
 
 class OfflineStage(Stage):
 
     def get_condition(self) -> Condition:
-        return SimilarScreenshotCondition(create_image('references/offline.png'), 1031, 327, 355, 948)
+        return SimilarScreenshotCondition(REFERENCES['offline'], 1031, 327, 355, 948)
 
     def get_command(self, prev_stage) -> Command:
         return ClickCommand(800, 1430)
@@ -281,17 +294,21 @@ class OfflineStage(Stage):
 class VideoNotAvailableStage(Stage):
 
     def get_condition(self) -> Condition:
-        return SimilarScreenshotCondition(create_image('references/video_not_available.png'), 1031, 327, 355, 948)
+        return SimilarScreenshotCondition(REFERENCES['video_not_available'], 1031, 327, 355, 948)
 
     def get_command(self, prev_stage) -> Command:
-        return StopGameCommand()
+        return BatchCommand(
+            StopGameCommand(),
+            TogglePowerCommand(),
+            WaitCommand(timedelta(minutes=10))
+        )
 
 
 class UnknownAdStage(Stage):
 
     def get_condition(self) -> Condition:
         return AndCondition(
-            SimilarScreenshotCondition(create_image('references/ad.png'), 998, 1520, 568, 73),
+            SimilarScreenshotCondition(REFERENCES['ad'], 998, 1520, 568, 73),
             SameScreenshotCondition()
         )
 
@@ -303,7 +320,7 @@ class UnityAdStage(Stage):
 
     def get_condition(self) -> Condition:
         return AndCondition(
-            SimilarScreenshotCondition(create_image('references/ad_unity.png'), 2366, 636, 84, 302),
+            SimilarScreenshotCondition(REFERENCES['ad_unity'], 2366, 636, 84, 302),
             SameScreenshotCondition()
         )
 
