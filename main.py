@@ -387,7 +387,8 @@ class UnityAdStage(Stage):
 
 STAGES = [PowerOffStage(), DesktopStage(), DailyBonusStage(), DailyBonusNotForFriendStage(), DailyRewardStage(),
           StartBonusStage(), StartStage(), BonusStage(), BonusRewardStage(), BankStage(), BankTimerStage(),
-          VideoNotAvailableStage(), UnknownAdStage(), UnityAdStage(), UnknownStage()]
+          BankNoButtonStage(), OfflineStage(), VideoNotAvailableStage(), UnknownAdStage(), UnityAdStage(),
+          UnknownStage()]
 
 
 class Screenshots:

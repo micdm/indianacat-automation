@@ -118,6 +118,8 @@ def test_same_screenshot_condition(single_screenshot, two_same_screenshots, two_
 def test_stage_list():
     for stage in STAGES:
         assert stage.get_command(Stages(1)) is not None
+    count = sum(key != 'Stage' and key.endswith('Stage') for key in main.__dict__)
+    assert len(STAGES) == count
 
 
 def test_screenshots(two_screenshots, image1, image2):
