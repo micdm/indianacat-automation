@@ -323,6 +323,11 @@ class BankTimerStage(Stage):
                 TogglePowerCommand(),
                 WaitCommand(timedelta(minutes=30))
             )
+        if isinstance(stages.previous, StartStage):
+            return BatchCommand(
+                TogglePowerCommand(),
+                WaitCommand(timedelta(minutes=10))
+            )
         return ClickCommand(1478, 446)
 
 
