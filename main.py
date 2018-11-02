@@ -226,7 +226,7 @@ class DailyBonusStage(Stage):
 
     def get_condition(self) -> Condition:
         return AndCondition(
-            SimilarScreenshotCondition(REFERENCES['daily_bonus'], 56, 308, 134, 948),
+            SimilarScreenshotCondition(REFERENCES['daily_bonus'], 800, 1060, 1030, 108),
             SimilarScreenshotCondition(REFERENCES['daily_bonus'], 2432, 1193, 82, 82)
         )
 
@@ -238,7 +238,7 @@ class DailyBonusNotForFriendStage(Stage):
 
     def get_condition(self) -> Condition:
         return AndCondition(
-            SimilarScreenshotCondition(REFERENCES['daily_bonus'], 56, 308, 134, 948),
+            SimilarScreenshotCondition(REFERENCES['daily_bonus'], 800, 1060, 1030, 108),
             NotCondition(
                 SimilarScreenshotCondition(REFERENCES['daily_bonus'], 2432, 1193, 82, 82)
             )
