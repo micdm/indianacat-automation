@@ -50,8 +50,8 @@ def create_image(path: str) -> Image:
 
 
 REFERENCES = dict((name, create_image('references/%s.png' % name)) for name in (
-    'ad', 'ad_unity', 'bank', 'bank_no_button', 'bonus', 'daily_bonus', 'daily_reward', 'desktop', 'offline',
-    'power_off', 'bonus_reward', 'start', 'start_bonus', 'video_not_available'
+    'ad', 'ad_unity', 'bank', 'bank_no_button', 'big_luck', 'bonus', 'daily_bonus', 'daily_reward', 'desktop',
+    'offline', 'power_off', 'bonus_reward', 'start', 'start_bonus', 'video_not_available'
 ))
 
 
@@ -298,6 +298,15 @@ class BonusRewardStage(Stage):
         return ClickCommand(784, 1538)
 
 
+class BigLuckStage(Stage):
+
+    def get_condition(self) -> Condition:
+        return SimilarScreenshotCondition(REFERENCES['big_luck'], 1012, 222, 662, 808)
+
+    def get_command(self, stages: 'Stages') -> Command:
+        return ClickCommand(1414, 400)
+
+
 class BankStage(Stage):
 
     def get_condition(self) -> Condition:
@@ -391,9 +400,9 @@ class UnityAdStage(Stage):
 
 
 STAGES = [PowerOffStage(), DesktopStage(), DailyBonusStage(), DailyBonusNotForFriendStage(), DailyRewardStage(),
-          StartBonusStage(), StartStage(), BonusStage(), BonusRewardStage(), BankStage(), BankTimerStage(),
-          BankNoButtonStage(), OfflineStage(), VideoNotAvailableStage(), UnknownAdStage(), UnityAdStage(),
-          UnknownStage()]
+          StartBonusStage(), StartStage(), BonusStage(), BonusRewardStage(), BigLuckStage(), BankStage(),
+          BankTimerStage(), BankNoButtonStage(), OfflineStage(), VideoNotAvailableStage(), UnknownAdStage(),
+          UnityAdStage(), UnknownStage()]
 
 
 class Screenshots:
