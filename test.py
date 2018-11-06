@@ -3,9 +3,10 @@ from random import randint
 import pytest
 from PIL.Image import Image, frombytes
 
-import main
-from main import SimilarScreenshotCondition, grab_screenshot, get_current_stage, STAGES, NotCondition, Condition, \
-    AndCondition, OrCondition, SameScreenshotCondition, Screenshots, Stages, UnknownStage, TrueCondition, StartStage
+from lib import common, ic, mlp
+from lib.common import Screenshots, Stages, UnknownStage, TrueCondition, Condition, create_references, NotCondition, \
+    AndCondition, OrCondition, SimilarScreenshotCondition, SameScreenshotCondition, grab_screenshot, get_current_stage
+from lib.ic import StartStage
 
 
 @pytest.fixture
@@ -61,8 +62,8 @@ def two_same_screenshots(image1):
 @pytest.fixture
 def stages():
     stages = Stages(2)
-    stages.add(UnknownStage())
-    stages.add(StartStage())
+    stages.add(UnknownStage(None))
+    stages.add(StartStage(None))
     return stages
 
 
@@ -77,6 +78,28 @@ def false_condition():
         def is_met(self, screenshots: Image, stages) -> bool:
             return False
     return _Condition()
+
+
+@pytest.fixture(scope='module')
+def references():
+    return create_references()
+
+
+@pytest.fixture(scope='module')
+def ic_stages_to_test(references):
+    return ic.get_stages_to_test(references)
+
+
+@pytest.fixture(scope='module')
+def mlp_stages_to_test(references):
+    return mlp.get_stages_to_test(references)
+
+
+def test_create_references(references):
+    assert len(references)
+    first_key = list(references.keys())[0]
+    assert not first_key.startswith('references/')
+    assert not first_key.endswith('.png')
 
 
 def test_true_condition(true_condition, single_screenshot, stages):
@@ -115,11 +138,16 @@ def test_same_screenshot_condition(single_screenshot, two_same_screenshots, two_
     assert not result
 
 
-def test_stage_list():
-    for stage in STAGES:
+def test_ic_get_stages_to_test(ic_stages_to_test):
+    for stage in ic_stages_to_test:
         assert stage.get_command(Stages(1)) is not None
-    count = sum(key != 'Stage' and key.endswith('Stage') for key in main.__dict__)
-    assert len(STAGES) == count
+    assert any(isinstance(stage, UnknownStage) for stage in ic_stages_to_test)
+
+
+def test_mlp_get_stages_to_test(mlp_stages_to_test):
+    for stage in mlp_stages_to_test:
+        assert stage.get_command(Stages(1)) is not None
+    assert any(isinstance(stage, UnknownStage) for stage in mlp_stages_to_test)
 
 
 def test_screenshots(two_screenshots, image1, image2):
@@ -140,15 +168,15 @@ def test_grab_screenshot(tmp_path):
 
 
 def test_grab_screenshot_if_cannot_grab(mocker, tmp_path):
-    mocker.patch.object(main, 'call')
-    main.call.return_value = 1
+    mocker.patch.object(common, 'call')
+    common.call.return_value = 1
     path = str(tmp_path)
     result = grab_screenshot(path)
     assert result is None
 
 
-def test_get_current_stage_if_not_met(two_screenshots, stages):
-    result = get_current_stage(STAGES, two_screenshots, stages)
+def test_get_current_stage_if_not_met(ic_stages_to_test, two_screenshots, stages):
+    result = get_current_stage(ic_stages_to_test, two_screenshots, stages)
     assert isinstance(result, UnknownStage)
 
 
