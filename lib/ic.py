@@ -5,7 +5,7 @@ from PIL.Image import Image
 
 from lib.common import Stage, Condition, AndCondition, SimilarScreenshotCondition, NotCondition, ClickCommand, \
     Command, BatchCommand, TogglePowerCommand, WaitCommand, StopGameCommand, UnknownAdStage, UnityAdStage, Stages, \
-    PowerOffStage, DesktopStage, UnknownStage, StartGameCommand
+    PowerOffStage, DesktopStage, UnknownStage, StartGameCommand, OrCondition
 
 
 class DailyBonusStage(Stage):
@@ -160,7 +160,10 @@ class VideoNotAvailableStage(Stage):
         self._stop_game_command = stop_game_command
 
     def get_condition(self) -> Condition:
-        return SimilarScreenshotCondition(self._references['ic/video_not_available'], 1031, 327, 355, 948)
+        return OrCondition(
+            SimilarScreenshotCondition(self._references['ic/video_not_available'], 1031, 327, 355, 948),
+            SimilarScreenshotCondition(self._references['ic/video_not_available_2'], 1032, 322, 486, 958)
+        )
 
     def get_command(self, stages: Stages) -> Command:
         return BatchCommand(

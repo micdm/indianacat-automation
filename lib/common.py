@@ -261,7 +261,10 @@ class UnityAdStage(Stage):
 
     def get_condition(self) -> Condition:
         return AndCondition(
-            SimilarScreenshotCondition(self._references['common/ad_unity'], 2366, 636, 84, 302),
+            OrCondition(
+                SimilarScreenshotCondition(self._references['common/ad_unity'], 2366, 636, 84, 302),
+                SimilarScreenshotCondition(self._references['common/ad_unity_2'], 2388, 649, 74, 291)
+            ),
             SameScreenshotCondition()
         )
 
