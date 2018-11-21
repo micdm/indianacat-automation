@@ -157,6 +157,7 @@ def test_screenshots(two_screenshots, image1, image2):
 
 def test_stages(stages):
     assert isinstance(stages.previous, UnknownStage)
+    assert not stages.is_unknown_for_long_time
 
 
 @pytest.mark.skip(reason='device required')

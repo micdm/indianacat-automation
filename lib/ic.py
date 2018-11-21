@@ -5,14 +5,14 @@ from PIL.Image import Image
 
 from lib.common import Stage, Condition, AndCondition, SimilarScreenshotCondition, NotCondition, ClickCommand, \
     Command, BatchCommand, TogglePowerCommand, WaitCommand, StopGameCommand, UnknownAdStage, UnityAdStage, Stages, \
-    PowerOffStage, DesktopStage, UnknownStage, StartGameCommand, OrCondition
+    PowerOffStage, DesktopStage, UnknownStage, StartGameCommand, OrCondition, UnexpectedStateStage, AnimatedAdStage
 
 
 class DailyBonusStage(Stage):
 
     def get_condition(self) -> Condition:
         return AndCondition(
-            SimilarScreenshotCondition(self._references['ic/daily_bonus'], 800, 1060, 1030, 108),
+            SimilarScreenshotCondition(self._references['ic/daily_bonus'], 1026, 176, 346, 496),
             SimilarScreenshotCondition(self._references['ic/daily_bonus'], 2432, 1193, 82, 82)
         )
 
@@ -24,7 +24,7 @@ class DailyBonusNotForFriendStage(Stage):
 
     def get_condition(self) -> Condition:
         return AndCondition(
-            SimilarScreenshotCondition(self._references['ic/daily_bonus'], 800, 1060, 1030, 108),
+            SimilarScreenshotCondition(self._references['ic/daily_bonus'], 1026, 176, 346, 496),
             NotCondition(
                 SimilarScreenshotCondition(self._references['ic/daily_bonus'], 2432, 1193, 82, 82)
             )
@@ -173,6 +173,18 @@ class VideoNotAvailableStage(Stage):
         )
 
 
+class AdSkippedStage(Stage):
+
+    def __init__(self, resources: Dict[str, Image]):
+        super().__init__(resources)
+
+    def get_condition(self) -> Condition:
+        return SimilarScreenshotCondition(self._references['ic/ad_skipped'], 1042, 338, 292, 940)
+
+    def get_command(self, stages: Stages) -> Command:
+        return ClickCommand(766, 1422)
+
+
 def get_stages_to_test(references: Dict[str, Image]) -> List[Stage]:
     package_name = 'com.playflock.indianacat'
     start_game_command = StartGameCommand(package_name, 'unity.pfplugins.com.activitybridge.UnityActivityOverrider')
@@ -193,7 +205,10 @@ def get_stages_to_test(references: Dict[str, Image]) -> List[Stage]:
         BankNoButtonStage(references, stop_game_command),
         OfflineStage(references),
         VideoNotAvailableStage(references, stop_game_command),
+        AdSkippedStage(references),
         UnknownAdStage(references, start_game_command),
         UnityAdStage(references, start_game_command),
+        AnimatedAdStage(references),
+        UnexpectedStateStage(references, stop_game_command),
         UnknownStage(references)
     ]

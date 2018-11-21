@@ -120,6 +120,12 @@ class SameScreenshotCondition(Condition):
         return not diff.getbbox()
 
 
+class IsUnknownForLongTimeCondition(Condition):
+
+    def is_met(self, screenshots: 'Screenshots', stages: 'Stages') -> bool:
+        return stages.is_unknown_for_long_time
+
+
 class Command:
 
     def execute(self):
@@ -215,6 +221,23 @@ class UnknownStage(Stage):
         return NoOpCommand()
 
 
+class UnexpectedStateStage(Stage):
+
+    def __init__(self, resources: Dict[str, Image], stop_game_command: StopGameCommand):
+        super().__init__(resources)
+        self._stop_game_command = stop_game_command
+
+    def get_condition(self) -> Condition:
+        return IsUnknownForLongTimeCondition()
+
+    def get_command(self, stages: 'Stages') -> Command:
+        return BatchCommand(
+            self._stop_game_command,
+            TogglePowerCommand(),
+            WaitCommand(timedelta(minutes=10))
+        )
+
+
 class PowerOffStage(Stage):
 
     def get_condition(self) -> Condition:
@@ -251,6 +274,15 @@ class UnknownAdStage(Stage):
 
     def get_command(self, stages: 'Stages') -> Command:
         return self._start_game_command
+
+
+class AnimatedAdStage(Stage):
+
+    def get_condition(self) -> Condition:
+        return SimilarScreenshotCondition(self._references['common/ad_animated'], 1, 1, 97, 108)
+
+    def get_command(self, stages: 'Stages') -> Command:
+        return ClickCommand(1551, 48)
 
 
 class UnityAdStage(Stage):
@@ -302,6 +334,8 @@ class Screenshots:
 
 class Stages:
 
+    STAGE_COUNT_TO_BE_UNKNOWN = 20
+
     def __init__(self, max_count: int):
         self._stages = []
         self._max_count = max_count
@@ -309,6 +343,10 @@ class Stages:
     @property
     def previous(self) -> Optional[Stage]:
         return self._get_by_index(1)
+
+    @property
+    def is_unknown_for_long_time(self) -> bool:
+        return all(isinstance(self._get_by_index(i), UnknownStage) for i in range(self.STAGE_COUNT_TO_BE_UNKNOWN))
 
     def _get_by_index(self, index: int) -> Optional[Stage]:
         try:
@@ -341,27 +379,23 @@ def get_current_stage(stages_to_test: List[Stage], screenshots: Screenshots, sta
 
 def handle_tick(stages_to_test: List[Stage], directory: str, screenshots: Screenshots,
                 stages: Stages) -> Tuple[Screenshots, Stages, float]:
-    now = time()
     path = grab_screenshot(directory)
     if not path:
         return screenshots, stages, TICK_INTERVAL
     screenshot = create_image(path)
     screenshots.add(path, screenshot)
     stage = get_current_stage(stages_to_test, screenshots, stages)
-    if stage:
-        logger.info('Stage now is %s', stage)
-        stages.add(stage)
-        stage.get_command(stages).execute()
-        return screenshots, stages, TICK_INTERVAL
-    logger.info('Unknown stage')
-    return screenshots, stages, TICK_INTERVAL - (time() - now)
+    logger.info('Stage now is %s', stage)
+    stages.add(stage)
+    stage.get_command(stages).execute()
+    return screenshots, stages, TICK_INTERVAL
 
 
 def run(stages_to_test):
     with TemporaryDirectory() as directory:
         logger.info('Using directory %s as storage', directory)
-        screenshots = Screenshots(5)
-        stages = Stages(20)
+        screenshots = Screenshots(100)
+        stages = Stages(100)
         while True:
             screenshots, stages, wait = handle_tick(stages_to_test, directory, screenshots, stages)
             if wait > 0:
