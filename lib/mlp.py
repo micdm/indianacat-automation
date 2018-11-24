@@ -3,7 +3,7 @@ from typing import Dict, List
 from PIL.Image import Image
 
 from lib.common import Stage, UnityAdStage, Command, Condition, SimilarScreenshotCondition, Stages, ClickCommand, \
-    UnknownStage, StartGameCommand, AndCondition, OrCondition, SameScreenshotCondition
+    UnknownStage, StartGameCommand, AndCondition, OrCondition, SameScreenshotCondition, AbstractAdStage
 
 
 class NextEpisodeStage(Stage):
@@ -15,7 +15,7 @@ class NextEpisodeStage(Stage):
         return ClickCommand(640, 1530)
 
 
-class InteractiveAdStage(Stage):
+class InteractiveAdStage(AbstractAdStage):
 
     def get_condition(self) -> Condition:
         return AndCondition(
@@ -27,7 +27,7 @@ class InteractiveAdStage(Stage):
         return ClickCommand(1552, 48)
 
 
-class AnotherAdStage(Stage):
+class AnotherAdStage(AbstractAdStage):
 
     def get_condition(self) -> Condition:
         return AndCondition(

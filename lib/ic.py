@@ -5,7 +5,8 @@ from PIL.Image import Image
 
 from lib.common import Stage, Condition, AndCondition, SimilarScreenshotCondition, NotCondition, ClickCommand, \
     Command, BatchCommand, TogglePowerCommand, WaitCommand, StopGameCommand, UnknownAdStage, UnityAdStage, Stages, \
-    PowerOffStage, DesktopStage, UnknownStage, StartGameCommand, OrCondition, UnexpectedStateStage, AnimatedAdStage
+    PowerOffStage, DesktopStage, UnknownStage, StartGameCommand, OrCondition, UnexpectedStateStage, AnimatedAdStage, \
+    AbstractAdStage
 
 
 class DailyBonusStage(Stage):
@@ -114,7 +115,7 @@ class BankTimerStage(Stage):
         )
 
     def get_command(self, stages: Stages) -> Command:
-        if isinstance(stages.previous, (UnknownAdStage, UnityAdStage)):
+        if isinstance(stages.previous, AbstractAdStage):
             return BatchCommand(
                 TogglePowerCommand(),
                 WaitCommand(timedelta(minutes=30))

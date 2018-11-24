@@ -260,7 +260,11 @@ class DesktopStage(Stage):
         return self._start_game_command
 
 
-class UnknownAdStage(Stage):
+class AbstractAdStage(Stage):
+    pass
+
+
+class UnknownAdStage(AbstractAdStage):
 
     def __init__(self, resources: Dict[str, Image], start_game_command: StartGameCommand):
         super().__init__(resources)
@@ -276,7 +280,7 @@ class UnknownAdStage(Stage):
         return self._start_game_command
 
 
-class AnimatedAdStage(Stage):
+class AnimatedAdStage(AbstractAdStage):
 
     def get_condition(self) -> Condition:
         return SimilarScreenshotCondition(self._references['common/ad_animated'], 1, 1, 97, 108)
@@ -285,7 +289,7 @@ class AnimatedAdStage(Stage):
         return ClickCommand(1551, 48)
 
 
-class UnityAdStage(Stage):
+class UnityAdStage(AbstractAdStage):
 
     def __init__(self, resources: Dict[str, Image], start_game_command: StartGameCommand):
         super().__init__(resources)
